@@ -83,13 +83,13 @@ public:
                 switch(*types)
                 {
                 case is_str:
-                    out << reinterpret_cast<strnode>(*jt).get();
+                    out << dynamic_cast<strnode>(*jt).get();
                 break;
                 case is_int:
-                    out << reinterpret_cast<intnode>(*jt).get();
+                    out << dynamic_cast<intnode>(*jt).get();
                 break;
                 case is_double:
-                    out << reinterpret_cast<doublenode>(*jt).get();
+                    out << dynamic_cast<doublenode>(*jt).get();
                 break;
                 }
                 out << ',';
@@ -118,11 +118,29 @@ public:
 
     void create_row()
     {
-
+        table.push_back( new row );
     }
-	bool append( const std::string & s );
-	bool append( int i );
-	bool append( double d );
+	bool append( const std::string & s )
+	{
+        if(can_write)
+        {
+            table[ which_row ]->append( new strnode(s));
+        }
+	}
+	bool append( int i )
+	{
+        if(can_write)
+        {
+            table[ which_row ]->append( new intnode(i));
+        }
+	}
+	bool append( double d )
+	{
+        if(can_write)
+        {
+            table[ which_row ]->append( new doublenode(d));
+        }
+	}
 
 	unsigned int NoRows()
 	{
