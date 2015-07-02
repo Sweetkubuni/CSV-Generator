@@ -6,25 +6,38 @@
 *	@author: Justin B
 *
 *	@purpose: The purpose of this code is to generate or manage CSV files.
+*   @version: 1.0
 */
 
 #ifndef CSV_H
 #define CSV_H
 
-#include <iostream>
+#include <fstream>
+#include <vector>
 #include <list>
 #include <string>
+
+
+enum what_type
+{
+    is_str,
+    is_int,
+    is_double
+};
 
 class node
 {
 private:
-	std::vector<node *> childern;
+	std::list<node *> childern;
+	std::list<what_type> types;
 protected:
 	node () { }
 public:
-	void add( node * n ) { childern.push_back( n ); }
-	std::vector<node *>::iterator & begin() { return childen.begin(); }
-	std::vector<node *>::iterator & end() { return childern.end(); }
+	void add_data( node * n )   { childern.push_back( n ); }
+	void add_type(what_type wt) { types.push_back(wt); }
+	std::list<node *>::iterator  begin() { std::list<node *>::iterator first = childern.begin(); return first; }
+	//std::list<node *>::iterator   end() { return childern.end(); }
+	std::list<what_type>::iterator  get_types() { std::list<what_type>::iterator first = types.begin(); return first; }
 	virtual ~node() { }
 };
 
@@ -46,21 +59,13 @@ typedef typenode<int> intnode;
 typedef typenode<double> doublenode;
 
 
-enum what_type
-{
-    is_str,
-    is_int,
-    is_double
-};
 
+/*
+    This is our rootnode
+*/
 class row_t
 {
-     std::vector<what_type> types;
-     public:
-         void append(strnode * n ) { types.push_back(is_str); add(n); }
-         void append(intnode * n ) { types.push_back(is_int); add(n); }
-         void append(doublenode * n ) { types.push_back(is_double); add(n); }
-        std::vector<what_type>::iterator & get_types() { return types.begin(); }
+
 };
 
 typedef typenode<row_t> row;
@@ -70,15 +75,16 @@ class CSV
 	std::vector<row *> table;
 	bool can_write;
 	unsigned int which_row;
+	std::list<what_type> types;
 public:
 
     CSV() { which_row = 0; can_write = false; }
 
-	void write(std::ostream & out )
+	void write(std::ofstream & out )
 	{
 	    for(std::vector<row *>::iterator it = table.begin(); it != table.end(); it++)
         {
-            for ( std::vector<node *>::iterator jt = it->begin(), std::vector<what_type>::iterator types = jt->get_types(); jt != it->end(); jt++ , types++ )
+            for ( std::list<node *>::iterator jt = it->begin(), std::list<what_type>::iterator types = jt->get_types(); jt != it->end(); jt++ , types++ )
             {
                 switch(*types)
                 {
@@ -124,21 +130,24 @@ public:
 	{
         if(can_write)
         {
-            table[ which_row ]->append( new strnode(s));
+            table[ which_row ]->add_data( new strnode(s));
+            table[ which_row ]->add_type( is_str );
         }
 	}
 	bool append( int i )
 	{
         if(can_write)
         {
-            table[ which_row ]->append( new intnode(i));
+            table[ which_row ]->add_data( new intnode(i));
+            table[ which_row ]->add_type( is_int );
         }
 	}
 	bool append( double d )
 	{
         if(can_write)
         {
-            table[ which_row ]->append( new doublenode(d));
+            table[ which_row ]->add_data( new doublenode(d));
+            table[ which_row ]->add_type( is_double );
         }
 	}
 
