@@ -12,7 +12,7 @@
 #ifndef CSV_H
 #define CSV_H
 
-#include <fstream>
+#include <ostream>
 #include <vector>
 #include <list>
 #include <string>
@@ -80,7 +80,7 @@ public:
 
     CSV() { which_row = 0; can_write = false; }
 
-	void write(std::ofstream & out )
+	void write(std::ostream & out )
 	{
 	    for(std::vector<row *>::iterator it = table.begin(); it != table.end(); it++)
         {
