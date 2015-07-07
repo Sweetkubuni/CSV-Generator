@@ -16,145 +16,47 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <memory>
 
-
-enum what_type
+struct Item
 {
-    is_str,
-    is_int,
-    is_double
+public:
+	Item() { }
 };
 
-class node
+class row
 {
 private:
-	std::list<node *> childern;
-	std::list<what_type> types;
-protected:
-	node () { }
+	std::list<std::unique_ptr<Item>> Items;
 public:
-	void add_data( node * n )   { childern.push_back( n ); }
-	void add_type(what_type wt) { types.push_back(wt); }
-	std::list<node *>::iterator  begin() { std::list<node *>::iterator first = childern.begin(); return first; }
-	//std::list<node *>::iterator   end() { return childern.end(); }
-	std::list<what_type>::iterator  get_types() { std::list<what_type>::iterator first = types.begin(); return first; }
-	virtual ~node() { }
+	row();
+	std::list<std::unique_ptr<Item>>::iterator Begin();
+	std::list<std::unique_ptr<Item>>::iterator End();
+	unsigned int	NoItems();
 };
 
-template< typename type>
-class typenode : public node
-{
-private:
-	type data;
-public:
-	typenode( type t ) { data = t; }
-
-	type & get() { return data; }
-};
-
-
-
-typedef typenode<std::string> strnode;
-typedef typenode<int> intnode;
-typedef typenode<double> doublenode;
-
-
-
-/*
-    This is our rootnode
-*/
-class row_t
+template<typename d>
+struct Specific_Item : public Item
 {
 
+	d data;
+	Specific_Item( d ndata ):data(ndata) {  }
 };
 
-typedef typenode<row_t> row;
+typedef Specific_Item<int> int_Item;
+typedef Specific_Item<double> double_Item;
+typedef Specific_Item<std::string> string_Item;
 
 class CSV
 {
-	std::vector<row *> table;
-	bool can_write;
-	unsigned int which_row;
-	std::list<what_type> types;
+private:
+	std::vector< row > rows;
 public:
-
-    CSV() { which_row = 0; can_write = false; }
-
-	void write(std::ostream & out )
-	{
-	    for(std::vector<row *>::iterator it = table.begin(); it != table.end(); it++)
-        {
-            for ( std::list<node *>::iterator jt = it->begin(), std::list<what_type>::iterator types = jt->get_types(); jt != it->end(); jt++ , types++ )
-            {
-                switch(*types)
-                {
-                case is_str:
-                    out << dynamic_cast<strnode>(*jt).get();
-                break;
-                case is_int:
-                    out << dynamic_cast<intnode>(*jt).get();
-                break;
-                case is_double:
-                    out << dynamic_cast<doublenode>(*jt).get();
-                break;
-                }
-                out << ',';
-            }
-            out<< '\n';
-        }
-	}
-
-	//void read(std::istream & in); will work on later
-
-
-
-    bool set_row(unsigned int r)
-    {
-        which_row = r;
-
-        if( r < table.size() )
-        {
-            can_write = true;
-        }
-        else
-        {
-            can_write = false;
-        }
-    }
-
-    void create_row()
-    {
-        table.push_back( new row );
-    }
-	bool append( const std::string & s )
-	{
-        if(can_write)
-        {
-            table[ which_row ]->add_data( new strnode(s));
-            table[ which_row ]->add_type( is_str );
-        }
-	}
-	bool append( int i )
-	{
-        if(can_write)
-        {
-            table[ which_row ]->add_data( new intnode(i));
-            table[ which_row ]->add_type( is_int );
-        }
-	}
-	bool append( double d )
-	{
-        if(can_write)
-        {
-            table[ which_row ]->add_data( new doublenode(d));
-            table[ which_row ]->add_type( is_double );
-        }
-	}
-
-	unsigned int NoRows()
-	{
-        return table.size();
-    }
+	CVS();
+	void	write( std::ostream & out );
+	void	read(  std::istream & in );
+	bool	append(unsigned int row, int);
+	bool	append(unsigned int row, double);
+	bool	append(unsigned int row, std::string);
 };
-
 #endif // CSV_H
