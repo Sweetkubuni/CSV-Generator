@@ -22,6 +22,10 @@ struct Item
 {
 public:
 	Item() { }
+	
+	void write( std::ostream & out );
+	
+	void read( std::string & var   );
 };
 
 class row
@@ -32,6 +36,7 @@ public:
 	row();
 	std::list<std::unique_ptr<Item>>::iterator Begin();
 	std::list<std::unique_ptr<Item>>::iterator End();
+	void append(Item * item);
 	unsigned int	NoItems();
 };
 
