@@ -22,10 +22,8 @@ struct Item
 {
 public:
 	Item() { }
-	
-	void write( std::ostream & out );
-	
-	void read( std::string & var   );
+
+	virtual void write( std::ostream & out )=0;
 };
 
 class row
@@ -33,10 +31,10 @@ class row
 private:
 	std::list<std::unique_ptr<Item>> Items;
 public:
-	row();
+	row() { /*empty */ }
+	void append( Item * item ) ;
 	std::list<std::unique_ptr<Item>>::iterator Begin();
 	std::list<std::unique_ptr<Item>>::iterator End();
-	void append(Item * item);
 	unsigned int	NoItems();
 };
 
@@ -46,6 +44,8 @@ struct Specific_Item : public Item
 
 	d data;
 	Specific_Item( d ndata ):data(ndata) {  }
+
+	void write( std::ostream & out ) { out << ndata; }
 };
 
 typedef Specific_Item<int> int_Item;
@@ -57,11 +57,12 @@ class CSV
 private:
 	std::vector< row > rows;
 public:
-	CVS();
+	CVS() {/*empty */ }
 	void	write( std::ostream & out );
-	void	read(  std::istream & in );
-	bool	append(unsigned int row, int);
-	bool	append(unsigned int row, double);
-	bool	append(unsigned int row, std::string);
+	//void	read(  std::istream & in );
+	void    create_row();
+	bool	append(unsigned int sel, int data);
+	bool	append(unsigned int sel, double data);
+	bool	append(unsigned int sel, std::string data);
 };
 #endif // CSV_H
