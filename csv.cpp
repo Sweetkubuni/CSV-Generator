@@ -1,19 +1,33 @@
 
 #include "csv.h"
+#include <utility>
+#include <string>
 
-std::list<std::unique_ptr<Item>>::iterator row::Begin()
+template<typename d>
+struct Specific_Item : public Item
 {
-    return Items.begin();
-}
 
-std::list<std::unique_ptr<Item>>::iterator row::End()
-{
-    return Items.end();
-}
+	d data;
+	Specific_Item( d ndata ): data(ndata) {  }
 
-unsigned int row::NoItems()
+	void write( std::stringstream & out ) { out << data; }
+};
+
+typedef Specific_Item<int> int_Item;
+typedef Specific_Item<double> double_Item;
+typedef Specific_Item<std::string> string_Item;
+
+
+void row::write( std::ostream & out )
 {
-    return Items.size();
+    std::stringstream ss;
+    for(auto && item : Items)
+    {
+        item->write(ss);
+        ss << ',';
+    }
+    ss <<'\n';
+    out << ss.str();
 }
 
 void row::append( Item * item )
@@ -59,16 +73,8 @@ bool CSV::append(unsigned int sel, std::string data)
 
 void CSV::write( std::ostream & out )
 {
-    for( auto & row : rows)
-    {
-        auto row_ptr = row.Begin();
-        auto row_end = row.End();
-        while( row_ptr != row_end )
-        {
-            row_ptr->write(out);
-            out << ',';
-            ++row_ptr;
-        }
-        out << '\n';
-    }
+  for( auto & r : rows)
+  {
+    r.write(out);
+  }
 }
