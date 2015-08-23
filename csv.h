@@ -15,15 +15,15 @@
 #include <ostream>
 #include <vector>
 #include <list>
-#include <string>
 #include <memory>
-
+#include <sstream>
 struct Item
 {
 public:
 	Item() { }
 
-	virtual void write( std::ostream & out )=0;
+	virtual void write( std::stringstream & out )=0;
+	//virtual void read(  std::istream & in )=0;
 };
 
 class row
@@ -33,24 +33,10 @@ private:
 public:
 	row() { /*empty */ }
 	void append( Item * item ) ;
-	std::list<std::unique_ptr<Item>>::iterator Begin();
-	std::list<std::unique_ptr<Item>>::iterator End();
-	unsigned int	NoItems();
+    void write( std::ostream & out );
 };
 
-template<typename d>
-struct Specific_Item : public Item
-{
 
-	d data;
-	Specific_Item( d ndata ):data(ndata) {  }
-
-	void write( std::ostream & out ) { out << ndata; }
-};
-
-typedef Specific_Item<int> int_Item;
-typedef Specific_Item<double> double_Item;
-typedef Specific_Item<std::string> string_Item;
 
 class CSV
 {
